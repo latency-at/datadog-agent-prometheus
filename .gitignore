@@ -1,0 +1,4 @@
+conf.d/
+.cache/
+*.pyc
+__pycache__
