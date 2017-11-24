@@ -3,6 +3,10 @@ import re
 from checks import CheckException
 from checks.prometheus_check import PrometheusCheck
 
+# FIXME: Add leader election
+# from utils.kubernetes import KubeUtil
+# self.kubeutil.refresh_leader()
+
 def compileRes(regexs):
     if regexs == None:
         return []
@@ -39,18 +43,19 @@ class GenericCheck(PrometheusCheck):
         config = instance.get('config', {})
         drops = compileRes(config.get('drop'))
         keeps = compileRes(config.get('keep'))
-        headers = config.get('headers')
+        headers = config.get('headers', {})
 
         content_type, data = self.poll(endpoint, headers=headers)
         for metric in filter(
                 lambda m: filterMetric(m, drops, keeps),
                 self.parse_metric_family(data, content_type)):
-                self._submit_metric(metric.name, metric, send_histograms_buckets)
+                self._submit_metric(metric.name, metric, send_histograms_buckets,
+                        custom_tags=["instance:"+endpoint])
 
     def check(self, instance):
         endpoint = instance.get('target')
         if endpoint is None:
-            raise CheckException("Unable to find prometheus_endpoint in config file.")
+            raise CheckException("Unable to find target in config file.")
 
         # By default we send the buckets.
         send_buckets = instance.get('send_histograms_buckets', True)
@@ -61,5 +66,3 @@ class GenericCheck(PrometheusCheck):
 
         self.process(endpoint, send_histograms_buckets=send_buckets,
                 instance=instance)
-
-

@@ -20,7 +20,7 @@ and `node_memory.*` to DataDog:
 init_config:
 
 instances:
-  - prometheus_endpoint: http://localhost:9100/metrics
+  - target: http://localhost:9100/metrics
     config:
       drop:
         - .*
