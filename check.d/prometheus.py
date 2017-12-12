@@ -40,6 +40,7 @@ class GenericCheck(PrometheusCheck):
     def process(self, endpoint, send_histograms_buckets=True, instance=None,
             drops=[], keeps=[], headers={}):
 
+        tags = instance.get('tags', [])
         config = instance.get('config', {})
         drops = compileRes(config.get('drop'))
         keeps = compileRes(config.get('keep'))
@@ -50,7 +51,7 @@ class GenericCheck(PrometheusCheck):
                 lambda m: filterMetric(m, drops, keeps),
                 self.parse_metric_family(data, content_type)):
                 self._submit_metric(metric.name, metric, send_histograms_buckets,
-                        custom_tags=["instance:"+endpoint])
+                        custom_tags=tags+["instance:"+endpoint])
 
     def check(self, instance):
         endpoint = instance.get('target')

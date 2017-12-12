@@ -54,3 +54,17 @@ instances:
   - target: https://sgp1.do.mon.latency.at/probe?target=https://latency.at
     config: *config
 ```
+
+### Custom tags
+
+You can specify add custom tags to metrics by setting an array of key-value pairs delimited by `:` to `tags` like:
+
+```
+init_config:
+
+instances:
+  - target: http://localhost:9100/metrics
+    tags:
+      - env:test
+      - kube_cluster:k8s1
+```
