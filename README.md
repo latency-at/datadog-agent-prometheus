@@ -41,7 +41,7 @@ init_config:
 instances:
   - target: https://sfo1.do.mon.latency.at/probe?target=https://latency.at
     config: &config
-      headers: &headers
+      headers:
         Authorization: "Bearer token"
       drop:
         - probe_.*
