@@ -45,12 +45,19 @@ class GenericCheck(PrometheusCheck):
         drops = compileRes(config.get('drop'))
         keeps = compileRes(config.get('keep'))
         headers = config.get('headers', {})
+        # Or 'text' according to checks.PrometheusFormat: https://github.com/DataDog/dd-agent/blob/master/checks/prometheus_check.py#L32
+        format = instance.get('format', 'protobuf').upper()
 
-        content_type, data = self.poll(endpoint, headers=headers)
+        content_type, data = self.poll(endpoint, headers=headers, pFormat=format)
         for metric in filter(
                 lambda m: filterMetric(m, drops, keeps),
                 self.parse_metric_family(data, content_type)):
-                self._submit_metric(metric.name, metric, send_histograms_buckets,
+                # Since dd-agent 5.21.0 according to https://github.com/DataDog/dd-agent/commit/e747b69
+                if callable(getattr(self, '_submit', None)):
+                    self._submit(metric.name, metric, send_histograms_buckets,
+                        custom_tags=tags+["instance:"+endpoint])
+                else:
+                    self._submit_metric(metric.name, metric, send_histograms_buckets,
                         custom_tags=tags+["instance:"+endpoint])
 
     def check(self, instance):
