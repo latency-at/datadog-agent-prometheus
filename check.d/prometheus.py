@@ -58,10 +58,10 @@ class GenericCheck(PrometheusCheck):
         else:
             format = format.upper()
 
-        content_type, data = self.poll(endpoint, headers=headers, pFormat=format)
+        response = self.poll(endpoint, headers=headers, pFormat=format)
         for metric in filter(
                 lambda m: filterMetric(m, drops, keeps),
-                self.parse_metric_family(data, content_type)):
+                self.parse_metric_family(response)):
                 # Since dd-agent 5.21.0 according to https://github.com/DataDog/dd-agent/commit/e747b69
                 if callable(getattr(self, '_submit', None)):
                     self._submit(metric.name, metric, send_histograms_buckets,
